@@ -109,11 +109,6 @@ public class ReportServiceImpl implements ReportService {
         return 0;
     }
 
-//    @Override
-//    public int getNumberOfTriggerTermOccurrences(List<Note> noteList) {
-//        int occurrences = noteList.stream().mapToInt(n -> )
-//    }
-
     /**
      * Calculates a patient's age based on their birthdate
      * @param dob
