@@ -2,6 +2,7 @@ package com.mediscreen.report.domain.report;
 
 public class Report {
 
+    // To associate a report with a patient, if reports are to be stored in a DB down the road.
     private Integer patientId;
     private int age;
     private String riskLevel;

@@ -25,6 +25,26 @@ public class ReportController {
 
     private static final Logger log = LoggerFactory.getLogger(ReportController.class);
 
+    /**
+     * HTTP GET request loads a list of patients
+     * @param model
+     * @return ModelAndView
+     */
+    @GetMapping(value = "/patient/list")
+    public ModelAndView getAllPatients(Model model) {
+        ModelAndView mav = new ModelAndView();
+        mav.addObject("patientList", patientService.getPatientsList());
+        mav.setViewName("patient/list");
+        log.info("GET request received for getAllPatients()");
+        return mav;
+    }
+
+    /**
+     * HTTP GET request generates a diabetes assessment based on the patient's id
+     * @param patientId
+     * @param model
+     * @return ModelAndView
+     */
     @GetMapping("/report/assessment/{patientId}")
     public ModelAndView showReportByPatientId(@PathVariable("patientId") Integer patientId, Model model) {
         ModelAndView mav = new ModelAndView();
@@ -32,14 +52,11 @@ public class ReportController {
         if (patient != null) {
             Report report = reportService.getReport(patientId);
             model.addAttribute("patient", patient);
-            model.addAttribute("age", report.getAge());
-            model.addAttribute("riskLevel", report.getRiskLevel());
+            model.addAttribute("report", report);
             mav.setViewName("report/assessment");
         }
         log.info("GET request received for showReportByPatientId()");
         return mav;
-
     }
-
 
 }

@@ -8,9 +8,8 @@
 </head>
 <body>
 <div class="container" style=" margin-left: 30px;">
-    <div class="row"><h2>Patient List</h2></div>
+    <div class="row"><h2>Patient Report List</h2></div>
     <div class="row">
-        <!--        <a href="/patient/add" class="btn btn-primary btn-sm">Add New</a>-->
         <table class="table table-bordered">
             <thead>
             <tr>
@@ -30,12 +29,11 @@
                 <td th:text="${patient.givenName}"></td>
                 <td th:text="${patient.familyName}"></td>
                 <td th:text="${patient.dob}"></td>
-                <td style="width: 25%" th:text="${patient.sex}"></td>
+                <td style="width: 5%" th:text="${patient.sex}"></td>
                 <td th:text="${patient.address}"></td>
                 <td th:text="${patient.phone}"></td>
                 <td style="width: 50px" class="text-center">
-                    <a th:href="@{/note/add/{patientId}(patientId=${patient.id})}">Add a Note</a>&nbsp;|&nbsp;
-                    <a th:href="@{/note/list/{patientId}(patientId=${patient.id})}">View Patient's Notes</a>
+                    <a th:href="@{/report/assessment/{patientId}(patientId=${patient.id})}">Get Report</a>
                 </td>
             </tr>
             </tbody>

@@ -12,7 +12,7 @@ public class NoteService {
 
     private final RestTemplate restTemplate;
 
-    private final String requestURI = "http://localhost:8082//note/list/{patientId}";
+//    private String requestURI = "http://localhost:8082//note/list/";
 
     public NoteService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -24,9 +24,9 @@ public class NoteService {
      * @return List<Note>
      */
     public List<Note> getPatientNotes(int patientId) {
-        List<Note> noteList;
+        String requestURI = "http://localhost:8082//noteList/" + patientId;
         NoteListWrapper noteListWrapper = restTemplate.getForObject(requestURI, NoteListWrapper.class);
-        noteList = noteListWrapper.getNoteList();
+        List<Note> noteList = noteListWrapper.getNoteList();
         return noteList;
     }
 

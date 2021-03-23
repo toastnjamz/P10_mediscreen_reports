@@ -8,10 +8,8 @@ import com.mediscreen.report.service.patient.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +21,31 @@ public class ReportServiceImpl implements ReportService {
     private NoteService noteService;
     private PatientService patientService;
 
+    private List<String> triggerTermsList = Arrays.asList(
+            "hemoglobina1c",
+            "microalbumin",
+            "bodyheight",
+            "bodyweight",
+            "smoker",
+            "abnormal",
+            "cholesterol",
+            "dizziness",
+            "relapse",
+            "reaction",
+            "antibodies");
+
     @Autowired
     public ReportServiceImpl(NoteService noteService, PatientService patientService) {
         this.noteService = noteService;
         this.patientService = patientService;
     }
 
+    /**
+     * Generates a diabetes assessment for a patient based on their age, gender, and the number of times
+     * trigger terms appear in their note history
+     * @param patientId
+     * @return
+     */
     @Override
     public Report getReport(int patientId) {
         Patient patient = patientService.findPatientInList(patientId);
@@ -38,9 +55,11 @@ public class ReportServiceImpl implements ReportService {
         int occurrences = getNumberOfTriggerTermOccurrences(notesList);
         String riskLevel;
 
-        if (occurrences == 0) {
+        if (occurrences < 2 ) {
             riskLevel = "None";
-        } else if (occurrences == 2 && age >= 30) {
+        } else if (occurrences < 4 && age < 30) {
+            riskLevel = "Borderline";
+        } else if (occurrences >= 2 && age >= 30) {
             riskLevel = "Borderline";
         } else if (occurrences == 3 && age < 30 && sex == 'M') {
             riskLevel = "In Danger";
@@ -48,14 +67,8 @@ public class ReportServiceImpl implements ReportService {
             riskLevel = "In Danger";
         } else if (occurrences == 6 && age >= 30) {
             riskLevel = "In Danger";
-        } else if (occurrences == 5 && age < 30 && sex == 'M') {
-            riskLevel = "Early Onset";
-        } else if (occurrences == 7 && age < 30 && sex == 'F') {
-            riskLevel = "Early Onset";
-        } else if (occurrences >= 8 && age >= 30) {
-            riskLevel = "Early Onset";
         } else {
-            riskLevel = "Error: Not enough data";
+            riskLevel = "Early Onset";
         }
 
         Report report = new Report();
@@ -65,29 +78,49 @@ public class ReportServiceImpl implements ReportService {
         return report;
     }
 
+    /**
+     * Calculates the number of times trigger terms appear in a patient's note history
+     * @param noteList
+     * @return int
+     */
     @Override
     public int getNumberOfTriggerTermOccurrences(List<Note> noteList) {
-        String patientNotes = "";
+        String allNotesForAPatient = "";
         if (noteList != null) {
             for (Note note : noteList) {
-                patientNotes += note.getNote();
+                allNotesForAPatient += note.getNote() + " ";
             }
-            Map<String, Integer> occurrencesMap = new HashMap<>();
-            List<String> triggerWords = Arrays.asList(patientNotes.replaceAll(",", " ").split(" "));
-            for (String word : triggerWords) {
-                Integer occurrence = occurrencesMap.get(word);
-                occurrencesMap.put(word.toLowerCase(), (occurrence == null) ? 1 : occurrence +1);
+            Map<String, Integer> wordCountMap = new HashMap<>();
+
+            List<String> wordList = Arrays.asList(allNotesForAPatient.replaceAll(",", " ").replaceAll("\n", " ").split(" "));
+            for (String word : wordList) {
+                Integer numTimes = wordCountMap.get(word);
+                wordCountMap.put(word.toLowerCase(), (numTimes == null) ? 1 : numTimes +1);
             }
+
             int occurrences = 0;
+            for (String term : triggerTermsList) {
+                if (wordCountMap.keySet().contains(term)) {
+                    occurrences += wordCountMap.get(term.toLowerCase());
+                }
+            }
             return occurrences;
         }
         return 0;
     }
 
+//    @Override
+//    public int getNumberOfTriggerTermOccurrences(List<Note> noteList) {
+//        int occurrences = noteList.stream().mapToInt(n -> )
+//    }
 
+    /**
+     * Calculates a patient's age based on their birthdate
+     * @param dob
+     * @return int
+     */
     @Override
     public int getAge(LocalDate dob) {
-//        LocalDate localDate = LocalDate.parse(dob, DateTimeFormatter.ISO_LOCAL_DATE);
         return Period.between(dob, LocalDate.now()).getYears();
     }
 }
