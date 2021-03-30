@@ -3,23 +3,22 @@ package com.mediscreen.report.service.report;
 import com.mediscreen.report.domain.note.Note;
 import com.mediscreen.report.domain.patient.Patient;
 import com.mediscreen.report.domain.report.Report;
-import com.mediscreen.report.service.note.NoteService;
-import com.mediscreen.report.service.patient.PatientService;
+import com.mediscreen.report.service.note.NoteServiceClient;
+import com.mediscreen.report.service.patient.PatientServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class ReportServiceImpl implements ReportService {
 
-    private NoteService noteService;
-    private PatientService patientService;
+    private NoteServiceClient noteServiceClient;
+    private PatientServiceClient patientServiceClient;
 
     private List<String> triggerTermsList = Arrays.asList(
             "hemoglobina1c",
@@ -35,9 +34,9 @@ public class ReportServiceImpl implements ReportService {
             "antibodies");
 
     @Autowired
-    public ReportServiceImpl(NoteService noteService, PatientService patientService) {
-        this.noteService = noteService;
-        this.patientService = patientService;
+    public ReportServiceImpl(NoteServiceClient noteServiceClient, PatientServiceClient patientServiceClient) {
+        this.noteServiceClient = noteServiceClient;
+        this.patientServiceClient = patientServiceClient;
     }
 
     /**
@@ -48,27 +47,41 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public Report getReport(int patientId) {
-        Patient patient = patientService.findPatientInList(patientId);
+        Patient patient = patientServiceClient.findPatientInList(patientId);
         int age = getAge(patient.getDob());
         char sex = patient.getSex();
-        List<Note> notesList = noteService.getPatientNotes(patientId);
+        List<Note> notesList = noteServiceClient.getPatientNotes(patientId);
         int occurrences = getNumberOfTriggerTermOccurrences(notesList);
         String riskLevel;
 
-        if (occurrences < 2 ) {
+        if (occurrences < 2) {
             riskLevel = "None";
-        } else if (occurrences < 4 && age < 30) {
-            riskLevel = "Borderline";
-        } else if (occurrences >= 2 && age >= 30) {
+        } else if (occurrences == 2 && age > 30) {
             riskLevel = "Borderline";
         } else if (occurrences == 3 && age < 30 && sex == 'M') {
             riskLevel = "In Danger";
+        } else if (occurrences == 3 && age >= 30) {
+            riskLevel = "Borderline";
         } else if (occurrences == 4 && age < 30 && sex == 'F') {
             riskLevel = "In Danger";
+        } else if (occurrences == 4 && age >= 30) {
+            riskLevel = "Borderline";
         } else if (occurrences == 6 && age >= 30) {
             riskLevel = "In Danger";
-        } else {
+        } else if (occurrences == 6 && age < 30) {
+            riskLevel = "Borderline";
+        } else if (occurrences == 5 && age < 30 && sex == 'M') {
             riskLevel = "Early Onset";
+        } else if (occurrences == 5 && age >= 30) {
+            riskLevel = "In Danger";
+        } else if (occurrences == 7 && age < 30 && sex == 'F') {
+            riskLevel = "Early Onset";
+        } else if (occurrences == 7 && age >= 30) {
+            riskLevel = "In Danger";
+        } else if (occurrences >= 8 && age >= 30) {
+            riskLevel = "Early Onset";
+        } else {
+            riskLevel = "Something went wrong";
         }
 
         Report report = new Report();
@@ -85,26 +98,22 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public int getNumberOfTriggerTermOccurrences(List<Note> noteList) {
+        AtomicInteger occurrences = new AtomicInteger();
         String allNotesForAPatient = "";
         if (noteList != null) {
             for (Note note : noteList) {
-                allNotesForAPatient += note.getNote() + " ";
-            }
-            Map<String, Integer> wordCountMap = new HashMap<>();
-
-            List<String> wordList = Arrays.asList(allNotesForAPatient.replaceAll(",", " ").replaceAll("\n", " ").split(" "));
-            for (String word : wordList) {
-                Integer numTimes = wordCountMap.get(word);
-                wordCountMap.put(word.toLowerCase(), (numTimes == null) ? 1 : numTimes +1);
+                allNotesForAPatient += note.getNote();
             }
 
-            int occurrences = 0;
-            for (String term : triggerTermsList) {
-                if (wordCountMap.keySet().contains(term)) {
-                    occurrences += wordCountMap.get(term.toLowerCase());
+            String formattedNotes = allNotesForAPatient.toLowerCase().replaceAll(" ", "")
+                    .replaceAll("\\n", "");
+
+            triggerTermsList.forEach(term -> {
+              if (formattedNotes.contains(term)) {
+                occurrences.incrementAndGet();
                 }
-            }
-            return occurrences;
+            });
+            return occurrences.intValue();
         }
         return 0;
     }

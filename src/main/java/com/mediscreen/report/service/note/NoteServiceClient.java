@@ -8,13 +8,11 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Service
-public class NoteService {
+public class NoteServiceClient {
 
     private final RestTemplate restTemplate;
 
-//    private String requestURI = "http://localhost:8082//note/list/";
-
-    public NoteService(RestTemplate restTemplate) {
+    public NoteServiceClient(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

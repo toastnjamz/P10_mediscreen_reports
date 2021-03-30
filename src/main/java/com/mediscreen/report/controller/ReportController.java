@@ -2,7 +2,7 @@ package com.mediscreen.report.controller;
 
 import com.mediscreen.report.domain.patient.Patient;
 import com.mediscreen.report.domain.report.Report;
-import com.mediscreen.report.service.patient.PatientService;
+import com.mediscreen.report.service.patient.PatientServiceClient;
 import com.mediscreen.report.service.report.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -21,7 +21,7 @@ public class ReportController {
     ReportService reportService;
 
     @Autowired
-    PatientService patientService;
+    PatientServiceClient patientServiceClient;
 
     private static final Logger log = LoggerFactory.getLogger(ReportController.class);
 
@@ -33,7 +33,7 @@ public class ReportController {
     @GetMapping(value = "/patient/list")
     public ModelAndView getAllPatients(Model model) {
         ModelAndView mav = new ModelAndView();
-        mav.addObject("patientList", patientService.getPatientsList());
+        mav.addObject("patientList", patientServiceClient.getPatientsList());
         mav.setViewName("patient/list");
         log.info("GET request received for getAllPatients()");
         return mav;
@@ -48,7 +48,7 @@ public class ReportController {
     @GetMapping("/report/assessment/{patientId}")
     public ModelAndView showReportByPatientId(@PathVariable("patientId") Integer patientId, Model model) {
         ModelAndView mav = new ModelAndView();
-        Patient patient = patientService.findPatientInList(patientId);
+        Patient patient = patientServiceClient.findPatientInList(patientId);
         if (patient != null) {
             Report report = reportService.getReport(patientId);
             model.addAttribute("patient", patient);
