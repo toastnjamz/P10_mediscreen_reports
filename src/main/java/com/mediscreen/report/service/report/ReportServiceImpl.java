@@ -56,28 +56,20 @@ public class ReportServiceImpl implements ReportService {
 
         if (occurrences < 2) {
             riskLevel = "None";
-        } else if (occurrences == 2 && age > 30) {
+        } else if (occurrences <= 4 && age >= 30) {
             riskLevel = "Borderline";
         } else if (occurrences == 3 && age < 30 && sex == 'M') {
             riskLevel = "In Danger";
-        } else if (occurrences == 3 && age >= 30) {
-            riskLevel = "Borderline";
         } else if (occurrences == 4 && age < 30 && sex == 'F') {
             riskLevel = "In Danger";
-        } else if (occurrences == 4 && age >= 30) {
-            riskLevel = "Borderline";
-        } else if (occurrences == 6 && age >= 30) {
+        } else if (occurrences <= 7 && age >= 30) {
             riskLevel = "In Danger";
         } else if (occurrences == 6 && age < 30) {
             riskLevel = "Borderline";
         } else if (occurrences == 5 && age < 30 && sex == 'M') {
             riskLevel = "Early Onset";
-        } else if (occurrences == 5 && age >= 30) {
-            riskLevel = "In Danger";
         } else if (occurrences == 7 && age < 30 && sex == 'F') {
             riskLevel = "Early Onset";
-        } else if (occurrences == 7 && age >= 30) {
-            riskLevel = "In Danger";
         } else if (occurrences >= 8 && age >= 30) {
             riskLevel = "Early Onset";
         } else {

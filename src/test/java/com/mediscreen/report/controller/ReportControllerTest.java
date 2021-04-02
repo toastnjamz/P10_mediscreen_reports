@@ -1,6 +1,8 @@
 package com.mediscreen.report.controller;
 
+import com.mediscreen.report.domain.note.Note;
 import com.mediscreen.report.domain.patient.Patient;
+import com.mediscreen.report.domain.report.Report;
 import com.mediscreen.report.service.patient.PatientServiceClient;
 import com.mediscreen.report.service.report.ReportService;
 import org.junit.jupiter.api.BeforeAll;
@@ -16,6 +18,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -37,6 +40,8 @@ public class ReportControllerTest {
     PatientServiceClient patientServiceClient;
 
     private Patient patient;
+    private Note note;
+    private Report report;
 
     @BeforeAll
     public void setup() {
@@ -51,6 +56,16 @@ public class ReportControllerTest {
         patient.setSex('F');
         patient.setAddress("123 Test Street");
         patient.setPhone("555-555-5555");
+
+        note = new Note();
+        note.setId("123");
+        note.setNote("Test note");
+        note.setPatientId(100);
+
+        report = new Report();
+        report.setAge(50);
+        report.setRiskLevel("In Danger");
+        report.setPatientId(100);
     }
 
     @Test
@@ -62,10 +77,12 @@ public class ReportControllerTest {
 
     @Test
     public void showReportByPatientId_statusIsSuccessful() throws Exception {
-        mockMvc.perform(get("/report/assessment/" + 100))
+        when(patientServiceClient.findPatientInList(100)).thenReturn(patient);
+        when(reportService.getReport(100)).thenReturn(report);
+
+        mockMvc.perform(get("/report/assessment/{patientId}", "100"))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(view().name("report/assessment"));
     }
-
 
 }
