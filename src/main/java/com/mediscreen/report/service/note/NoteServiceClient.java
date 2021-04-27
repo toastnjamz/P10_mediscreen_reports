@@ -22,7 +22,7 @@ public class NoteServiceClient {
      * @return List<Note>
      */
     public List<Note> getPatientNotes(int patientId) {
-        String requestURI = "http://localhost:8082//noteList/" + patientId;
+        String requestURI = "http://notes:8082/noteList/" + patientId;
         NoteListWrapper noteListWrapper = restTemplate.getForObject(requestURI, NoteListWrapper.class);
         List<Note> noteList = noteListWrapper.getNoteList();
         return noteList;

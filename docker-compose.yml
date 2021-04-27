@@ -17,7 +17,7 @@ services:
       - 3306:3306
     environment:
       MYSQL_DATABASE: patients
-      MYSQL_ROOT_PASSWORD: FundTransferP6!
+      MYSQL_ROOT_PASSWORD: OpenClassrooms42!
   mongo:
     image: mongo:4.4.4-bionic
     ports:
