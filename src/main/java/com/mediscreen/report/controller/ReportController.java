@@ -7,6 +7,7 @@ import com.mediscreen.report.exception.PatientNotFoundException;
 import com.mediscreen.report.service.patient.PatientServiceClient;
 import com.mediscreen.report.service.report.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.concurrent.ExecutionException;
@@ -46,7 +45,7 @@ public class ReportController {
             mav.addObject("patientList", patientServiceClient.getPatientsList());
             mav.setViewName("patient/list");
             log.info("GET request received for getAllPatients()");
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             throw new MicroserviceNotFoundException();
         }
         return mav;
@@ -75,7 +74,7 @@ public class ReportController {
                 mav.setViewName("report/assessment");
             }
             log.info("GET request received for showReportByPatientId()");
-        } catch (Exception e) {
+        } catch (RestClientException e) {
             throw new MicroserviceNotFoundException();
         }
         return mav;
