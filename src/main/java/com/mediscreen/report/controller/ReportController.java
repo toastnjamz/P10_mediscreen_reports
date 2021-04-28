@@ -3,6 +3,7 @@ package com.mediscreen.report.controller;
 import com.mediscreen.report.domain.patient.Patient;
 import com.mediscreen.report.domain.report.Report;
 import com.mediscreen.report.exception.MicroserviceNotFoundException;
+import com.mediscreen.report.exception.PatientNotFoundException;
 import com.mediscreen.report.service.patient.PatientServiceClient;
 import com.mediscreen.report.service.report.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,11 +62,13 @@ public class ReportController {
      */
     @GetMapping("/report/assessment/{patientId}")
     public ModelAndView showReportByPatientId(@PathVariable("patientId") Integer patientId, Model model)
-            throws MicroserviceNotFoundException {
+            throws MicroserviceNotFoundException, PatientNotFoundException {
         ModelAndView mav = new ModelAndView();
         try {
             Patient patient = patientServiceClient.findPatientInList(patientId);
-            if (patient != null) {
+            if (patient == null) {
+                throw new PatientNotFoundException();
+            } else {
                 Report report = reportService.getReport(patientId);
                 model.addAttribute("patient", patient);
                 model.addAttribute("report", report);

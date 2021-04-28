@@ -1,6 +1,7 @@
 package com.mediscreen.report.controller;
 
 import com.mediscreen.report.exception.MicroserviceNotFoundException;
+import com.mediscreen.report.exception.PatientNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ui.Model;
@@ -24,6 +25,23 @@ public class ExceptionController {
      */
     @ExceptionHandler({MicroserviceNotFoundException.class})
     public ModelAndView microserviceErrorHandler(HttpServletRequest request, Exception exception, Model model) {
+        ModelAndView mav = new ModelAndView();
+        model.addAttribute("exception", exception.getMessage());
+        model.addAttribute("url", request.getRequestURL());
+        mav.setViewName("error/genericerror");
+        log.error(request.getRequestURI() + "threw" + exception);
+        return mav;
+    }
+
+    /**
+     * Exception Handler for PatientNotFoundException
+     * @param request
+     * @param exception
+     * @param model
+     * @return ModelAndView
+     */
+    @ExceptionHandler({PatientNotFoundException.class})
+    public ModelAndView patientErrorHandler(HttpServletRequest request, Exception exception, Model model) {
         ModelAndView mav = new ModelAndView();
         model.addAttribute("exception", exception.getMessage());
         model.addAttribute("url", request.getRequestURL());
